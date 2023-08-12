@@ -112,7 +112,20 @@ func rehberDüzenleKaldir(db *sql.DB, tabloAdi string, siraNoBelirle int) error 
 	return nil
 }
 
-// func rehberDüzenleGüncelle(db *sql.DB, tabloAdi string, siraNoBelirle int, isim string, soyisim string, telefon int) error {}
+func rehberDüzenleGüncelle(db *sql.DB, tabloAdi string, siraNoBelirle int, isim string, soyisim string, telefon int) error {
+	SQLqüncelle := fmt.Sprintf("UPDATE %s SET isim=$1, soyisim=$2, telefon=$3 WHERE sira_no=$4", tabloAdi)
+	stmt, err := db.Prepare(SQLqüncelle)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(isim, soyisim, telefon, siraNoBelirle)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Rehber girdisi güncellendi.")
+	return nil
+}
 
 func main() {
 	db, err := DatabaseBaglanma()
