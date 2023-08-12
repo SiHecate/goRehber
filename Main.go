@@ -30,7 +30,7 @@ func rehberOluştur(db *sql.DB, tabloAdi string) {
 			SiraNo SERIAL PRIMARY KEY,
 			isim VARCHAR(50),
 			soyisim VARCHAR(50),
-			telefon INT
+			telefon BIGINT
 		);
 	`, tabloAdi)
 
@@ -72,8 +72,6 @@ func rehberKaldir(db *sql.DB, tabloAdi string) error {
 	return nil
 }
 
-//INSERT INTO umutcann (isim, soyisim, telefon) VALUES ('Ad', 'Soyad', Numara);
-
 func rehberBilgiEkle(db *sql.DB, tabloAdi string, isim string, soyisim string, telefon int) error {
 	SQLbilgiEkle := fmt.Sprintf("INSERT INTO %s (isim, soyisim, telefon) VALUES ($1, $2, $3)", tabloAdi)
 	_, err := db.Exec(SQLbilgiEkle, isim, soyisim, telefon)
@@ -104,6 +102,18 @@ func rehberIcerikGöster(db *sql.DB, tabloAdi string) error {
 	return nil
 }
 
+func rehberDüzenleKaldir(db *sql.DB, tabloAdi string, siraNoBelirle int) error {
+	SQLkaldir := fmt.Sprintf("DELETE FROM %s WHERE sirano = $1", tabloAdi)
+	_, err := db.Exec(SQLkaldir, siraNoBelirle)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Veri başarıyla silindi.")
+	return nil
+}
+
+// func rehberDüzenleGüncelle(db *sql.DB, tabloAdi string, siraNoBelirle int, isim string, soyisim string, telefon int) error {}
+
 func main() {
 	db, err := DatabaseBaglanma()
 	if err != nil {
@@ -113,13 +123,16 @@ func main() {
 
 	var secim int
 	for {
+		fmt.Println("--------------------------------------")
 		fmt.Println("Menü:")
 		fmt.Println("1. Rehber Oluştur")
 		fmt.Println("2. Mevcut Tablo Adlarını Göster")
 		fmt.Println("3. Tablo Sil")
 		fmt.Println("4. İçerik")
 		fmt.Println("5. Bilgi ekle")
-		fmt.Println("6. Exit")
+		fmt.Println("6. Kaldır")
+		fmt.Println("7. Exit")
+		fmt.Println("--------------------------------------")
 		fmt.Scan(&secim)
 
 		switch secim {
@@ -134,7 +147,7 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("Mevcut Tablo Adları:")
+			fmt.Println("Mevcut Tablo Adları: ")
 			for _, ad := range tabloAdlari {
 				fmt.Println(ad)
 			}
@@ -158,7 +171,7 @@ func main() {
 			var tabloAdi string
 			var isim, soyisim string
 			var telefon int
-			fmt.Print("Tablo adı")
+			fmt.Print("Tablo adı: ")
 			fmt.Scan(&tabloAdi)
 			fmt.Print("İsim: ")
 			fmt.Scan(&isim)
@@ -171,6 +184,17 @@ func main() {
 				log.Fatal(err)
 			}
 		case 6:
+			var tabloAdi string
+			var siraNoBelirle int
+			fmt.Print("Tablo adı: ")
+			fmt.Scan(&tabloAdi)
+			fmt.Print("Sıra no: ")
+			fmt.Scan(&siraNoBelirle)
+			err := rehberDüzenleKaldir(db, tabloAdi, siraNoBelirle)
+			if err != nil {
+				log.Fatal(err)
+			}
+		case 7:
 			fmt.Println("Programdan çıkılıyor.")
 			return
 		default:
