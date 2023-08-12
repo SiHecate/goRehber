@@ -63,12 +63,44 @@ func tabloAdlariCek(db *sql.DB) ([]string, error) {
 }
 
 func rehberKaldir(db *sql.DB, tabloAdi string) error {
-	query := fmt.Sprintf("DROP TABLE IF EXISTS %s;", tabloAdi)
-	_, err := db.Exec(query)
+	SQLkaldir := fmt.Sprintf("DROP TABLE IF EXISTS %s;", tabloAdi)
+	_, err := db.Exec(SQLkaldir)
 	if err != nil {
 		return err
 	}
 	fmt.Printf("'%s' adlı tablo silindi.\n", tabloAdi)
+	return nil
+}
+
+//INSERT INTO umutcann (isim, soyisim, telefon) VALUES ('Ad', 'Soyad', Numara);
+
+func rehberBilgiEkle(db *sql.DB, tabloAdi string, isim string, soyisim string, telefon int) error {
+	SQLbilgiEkle := fmt.Sprintf("INSERT INTO %s (isim, soyisim, telefon) VALUES ($1, $2, $3)", tabloAdi)
+	_, err := db.Exec(SQLbilgiEkle, isim, soyisim, telefon)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Veri başarıyla eklendi.")
+	return nil
+}
+
+func rehberIcerikGöster(db *sql.DB, tabloAdi string) error {
+	SQLgöster := fmt.Sprintf("SELECT * FROM %s", tabloAdi)
+	rows, err := db.Query(SQLgöster)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var siraNo int
+		var isim, soyisim string
+		var telefon int
+		if err := rows.Scan(&siraNo, &isim, &soyisim, &telefon); err != nil {
+			return err
+		}
+		fmt.Printf("Sıra No: %d, İsim: %s, Soyisim: %s, Telefon: %d\n", siraNo, isim, soyisim, telefon)
+	}
 	return nil
 }
 
@@ -85,8 +117,9 @@ func main() {
 		fmt.Println("1. Rehber Oluştur")
 		fmt.Println("2. Mevcut Tablo Adlarını Göster")
 		fmt.Println("3. Tablo Sil")
-		fmt.Println("4. Çıkış")
-		fmt.Print("Seçiminizi yapın (1/2/3/4): ")
+		fmt.Println("4. İçerik")
+		fmt.Println("5. Bilgi ekle")
+		fmt.Println("6. Exit")
 		fmt.Scan(&secim)
 
 		switch secim {
@@ -114,7 +147,31 @@ func main() {
 				log.Fatal(err)
 			}
 		case 4:
-			fmt.Println("Programdan çıkılıyor...")
+			var tabloAdi string
+			fmt.Print("İçeriğini görmek istediğiniz tablo adını girin: ")
+			fmt.Scan(&tabloAdi)
+			err := rehberIcerikGöster(db, tabloAdi)
+			if err != nil {
+				log.Fatal(err)
+			}
+		case 5:
+			var tabloAdi string
+			var isim, soyisim string
+			var telefon int
+			fmt.Print("Tablo adı")
+			fmt.Scan(&tabloAdi)
+			fmt.Print("İsim: ")
+			fmt.Scan(&isim)
+			fmt.Print("Soyisim: ")
+			fmt.Scan(&soyisim)
+			fmt.Print("Telefon: ")
+			fmt.Scan(&telefon)
+			err := rehberBilgiEkle(db, tabloAdi, isim, soyisim, telefon)
+			if err != nil {
+				log.Fatal(err)
+			}
+		case 6:
+			fmt.Println("Programdan çıkılıyor.")
 			return
 		default:
 			fmt.Println("Geçersiz seçim. Lütfen tekrar deneyin.")
