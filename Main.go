@@ -40,7 +40,7 @@ func rehberOluştur(db *sql.DB, tabloAdi string) {
 	}
 }
 
-func tabloAdlariCek(db *sql.DB) ([]string, error) {
+func rehberListele(db *sql.DB) ([]string, error) {
 	SQLlistele := "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';"
 
 	rows, err := db.Query(SQLlistele)
@@ -156,7 +156,7 @@ func main() {
 			rehberOluştur(db, tabloAdi)
 			fmt.Printf("'%s' adlı tablo oluşturuldu.\n", tabloAdi)
 		case 2:
-			tabloAdlari, err := tabloAdlariCek(db)
+			tabloAdlari, err := rehberListele(db)
 			if err != nil {
 				log.Fatal(err)
 			}
